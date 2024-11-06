@@ -2,34 +2,30 @@ package main
 
 import (
 	"fmt"
-	"github.com/sirupsen/logrus"
+	"github.com/gin-gonic/gin"
+	"go.uber.org/fx"
+	"log"
 	"mahestan/conf"
 	"mahestan/internal/controller/dispatcher"
 	"mahestan/internal/repository/sqlite"
 )
 
-func main() {
-	if err := runServer(); err != nil {
-		logrus.WithError(err).Errorln("can not run server!")
-		return
+func runServer(router *gin.Engine, cfg *conf.AppConfig) {
+	port := fmt.Sprintf(":%d", cfg.App.Port)
+	if err := router.Run(port); err != nil {
+		log.Fatal(err)
 	}
 }
 
-func runServer() error {
-	cfg, err := conf.GetMahestanRuntimeConfig()
-	if err != nil {
-		return err
-	}
-
-	db, err := sqlite.ConnectToSqlite(cfg)
-	if err != nil {
-		return err
-	}
-
-	routerEngine, err := dispatcher.SetupRouter(db)
-	if err != nil {
-		return err
-	}
-
-	return routerEngine.Run(fmt.Sprintf(":%d", cfg.App.Port))
+func main() {
+	fx.New(
+		fx.Options(
+			fx.Provide(
+				conf.GetMahestanRuntimeConfig,
+				sqlite.ConnectToSqlite,
+				dispatcher.SetupRouter,
+			),
+			fx.Invoke(runServer),
+		),
+	).Run()
 }

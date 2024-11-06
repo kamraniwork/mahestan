@@ -20,4 +20,5 @@ func SetupCategoriesRoutes(gormDb *gorm.DB) *controller.CategoryController {
 
 func SetupCategoryRoutes(routes gin.IRoutes, categoryCtrl *controller.CategoryController) {
 	routes.POST("/category/create", categoryCtrl.CreateCategory)
+	routes.GET("/category/list", categoryCtrl.ListCategory)
 }

@@ -27,3 +27,11 @@ func (c *CategoryService) Create(ctx context.Context, input serializers.InputCat
 	}
 	return ent, nil
 }
+
+func (c *CategoryService) List(ctx context.Context) ([]models.Category, error) {
+	listEnt, err := c.categoryRepository.ReadAll(ctx)
+	if err != nil {
+		return listEnt, err
+	}
+	return listEnt, nil
+}
